@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import glob
 import PyQt5
 
-class Airfoil:
+class Airfoil_manager:
     """Class to read airfoil data from file (or use predefined airfoil)"""
     def __init__(self):
         #aiforil main data

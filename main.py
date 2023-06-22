@@ -1,6 +1,5 @@
 import time
-
-from airfoil import Airfoil
+from airfoil import Airfoil_manager
 from directory_management import clean_directory
 from grid_creator import Naca4Creator
 import threading
@@ -14,7 +13,7 @@ def main():
     x.make_airfoil()
 
     #airfoil asignation
-    foil = Airfoil()
+    foil = Airfoil_manager()
     foil.get_airfoil_metrics()
     foil.format_airfoil(foil.closest_point_to_origin())
     foil.rotate_airfoil(30)
