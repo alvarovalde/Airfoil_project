@@ -1,12 +1,12 @@
 import matplotlib.pyplot as plt
-
+from scipy.optimize import curve_fit
 import numpy as np
 import pandas as pd
 import scipy
 
 
 class Naca5Creator:
-    def __init__(self, NACA=23012, n_points=5000):
+    def __init__(self, NACA=39012, n_points=500):
         self.NACA = NACA  # this is name of naca before processing
         self.n_points = n_points
         self.NACA_designator = 5
@@ -57,19 +57,16 @@ class Naca5Creator:
         K1 = np.array([361.4,51.64,15.957,6.643,3.230])
         K1 = K1*self.Cl/0.3
 
-        f = scipy.interpolate.interp1d(xf, K1, bounds_error=False, fill_value='extrapolate', kind='quadratic')
+        def asymptotic_func(x, a, b, c):
+            return a * np.exp(-b * x) + c / x
 
-        Xf_new = np.linspace(0, 0.3, 50)
-        new_K1 = f(Xf_new)
+        # Fit the data points using the asymptotic function
+        params, _ = curve_fit(asymptotic_func, xf, K1)
 
-        l = scipy.interpolate.interp1d(Xf_new, new_K1, bounds_error=False, fill_value='extrapolate', kind='slinear')
 
-        self.K1 = l(self.Xf)
-        print(self.K1)
+        Xf_new = self.Xf
+        self.K1 = asymptotic_func(Xf_new, *params)
 
-        plt.scatter(xf,K1,color='blue')
-        plt.scatter(self.Xf,self.K1,color='red')
-        plt.show()
 
     def normal_camberline_function(self,x):
         yc = np.zeros(x.shape)
