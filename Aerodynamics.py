@@ -22,14 +22,16 @@ class Space_domain:
 
 
     def create_source_flow(self,strength=5,x_sr= -1,y_sr= 0):
-        # compute the velocity field on the mesh grid
-        self.u = self.u +(strength / (2 * math.pi) * ((self.X - x_sr) / ((self.X - x_sr) ** 2 + (self.Y - y_sr) ** 2)))
-        self.v = self.v + (strength / (2 * math.pi) *((self.Y - y_sr) / ((self.X - y_sr) ** 2 + (self.Y - y_sr) ** 2)))
 
-        width = 10
-        fig, ax = plt.subplots(figsize=(width, (self.y_end - self.y_start) / (self.x_end - self.x_start) * width))
-        # ax.axis([-0.25, 1.25, -1, 1])
-        ax.streamplot(self.X, self.Y, self.u, self.v, density=2, linewidth=1, arrowsize=2, arrowstyle='->')
+        # compute the velocity field on the mesh grid
+        self.u = self.u + (strength/(2*np.pi))*((self.X -x_sr)/((self.X -x_sr)**2 + (self.Y -y_sr)**2))
+
+        self.v = self.v + (strength / (2 * np.pi) *((self.Y - y_sr) / ((self.X - y_sr) ** 2 + (self.Y - y_sr) ** 2)))
+
+        fig, ax = plt.subplots()
+        ax.axis([self.x_start, self.x_end, self.y_start, self.y_end])
+        ax.scatter(self.X, self.Y, color='#CD2305', s=0.5, marker='o')
+        ax.streamplot(self.X, self.Y, self.u, self.v, density=2, linewidth=1, arrowsize=2)
         ax.scatter(x_sr,y_sr, color='#CD2305', s=40, marker='o')
         plt.show()
 
