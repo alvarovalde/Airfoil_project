@@ -6,10 +6,10 @@ matplotlib.use('Qt5Agg')
 class Space_domain:
     def __init__(self,num_of_points_per_direction=200):
         self.N = num_of_points_per_direction
-        self.x_start = -4
-        self.x_end = 4
-        self.y_start = -4
-        self.y_end = 4
+        self.x_start = -2
+        self.x_end = 2
+        self.y_start = -1
+        self.y_end = 1
         self.X = None
         self.Y =None # Y spoition of point (
         self.u = None   # X comp of speed vector
@@ -69,8 +69,8 @@ class Space_domain:
         x,y = np.array(self.s_s_pos).T
         ax.scatter(x,y,color='red')
     def create_doublet(self,strength=1, xpos=0.0,ypos=0.0 ):
-        self.create_source_flow(strength,xpos -1, ypos)
-        self.create_sink_flow(-strength,xpos+1,ypos)
+        self.create_source_flow(strength,xpos -0.5, ypos)
+        self.create_sink_flow(-strength,xpos+0.5,ypos)
 
 
     def plot_cp(self):
@@ -85,7 +85,7 @@ class Space_domain:
 so =Space_domain()
 so.create_grid()
 so.create_freestream(1,0)
-#so.create_vortex()
+so.create_vortex(4)
 so.create_doublet()
 so.get_cp()
 print(so.s_s_pos)
