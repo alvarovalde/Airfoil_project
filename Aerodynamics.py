@@ -4,11 +4,11 @@ import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Qt5Agg')
 class Space_domain:
-    ''''
+    """
     This class creates a virtual 2D space to plot areodynamics,
     it is based on linear, non-viscous, airfoil theory.
-    you can create freestreams, sources,sinks, douvlets and vortexes and plot them.
-    '''
+    you can create freestreams, sources,sinks, doublets and vortexes and plot them.
+    """
     def __init__(self,num_of_points_per_direction=200):
         self.N = num_of_points_per_direction    # resolution of grid will be (N,N). Unstable below N = 50
         self.X = None                           # X position of points in grid: (N,N) array of x coordinates
