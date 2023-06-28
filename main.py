@@ -9,7 +9,7 @@ from PySide6 import QtGui, QtCore, QtWidgets
 def main():
     # airfoil creator
     t1_start = time.perf_counter()
-    x = Naca4Creator(NACA=2112, n_points=500)
+    x = Naca4Creator(NACA=2112, n_points=40)
     x.make_airfoil()
 
     # airfoil asignation

@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
+import cmath
 
 import multiprocessing
 
@@ -30,10 +31,10 @@ class SpaceDomain:
         self.st_points = []                     # positions of stagnation points, list of tuples
 
         # plotting parameters
-        self.x_start = -3                       # start of view window in x direction
-        self.x_end = 3                          # end of view window in x direction
-        self.y_start = -3                       # start of view window in y direction
-        self.y_end = 3                          # end of view window in y direction
+        self.x_start = -4                       # start of view window in x direction
+        self.x_end = 4                          # end of view window in x direction
+        self.y_start = -4                       # start of view window in y direction
+        self.y_end = 4                          # end of view window in y direction
 
 
         # variable values (depending on current construction)
@@ -133,7 +134,7 @@ class SpaceDomain:
         # calculate the cylinder radius
         self.R = np.sqrt(kappa/(2*np.pi*self.u_inf))
 
-    def create_doublet_with_vortex(self, kappa=1.0, gamma=0.0):
+    def create_doublet_with_vortex(self, kappa=1.0, gamma=7):
         """
         Creates a doublet (with a vortex inside) behaviour, esentialy a rotating solid body,
         and ads it to current flow state.
@@ -143,12 +144,13 @@ class SpaceDomain:
         @param kappa: strength of the doublet
         @param gamma: strength of vortex, normally same as kappa. (positive rotation is clockwise)
                     - gamma = 0: no rotation; two stagnation points (0,pi)
-                    -
-                    -
-                    -
+                    - gamma < 4 pi * R * V : two real stagnation points
+                    - gamma = 4 pi * R * V : one stagnation point
+                    - gamma > 4 pi * R * V : two imaginary stagnation points
         @param x_vdb: (not-variable) x position of ,center of circular object
         @param y_vdb: (not-variable) x position of ,center of circular object
         """
+
         x_vdb = 0.0
         y_vdb = 0.0
         self.kappa = kappa
@@ -167,8 +169,13 @@ class SpaceDomain:
         self.s_s_pos.append((x_vdb, y_vdb))
         # calculate the cylinder radius
         self.R = np.sqrt(kappa/(2*np.pi*self.u_inf))
+        print(self.R*4*np.pi*self.u_inf)
 
     def get_cp(self):
+        """
+        Creates
+        @return:
+        """
         try:
             self.cp = 1.0 - (self.u ** 2 + self.v ** 2) / self.u_inf ** 2
         except TypeError as err:
@@ -184,16 +191,18 @@ class SpaceDomain:
 
         return cp
 
-
     def get_stagnation_points(self):
         try:
-            self.st_points.append((+np.sqrt(self.R**2 - (self.gamma / (4 * np.pi * self.u_inf))**2),-self.gamma / (4 * np.pi * self.u_inf)))
+            point1 = (+cmath.sqrt(self.R ** 2 - (self.gamma / (4 * cmath.pi * self.u_inf)) ** 2) * 1j,
+                      -self.gamma / (4 * cmath.pi * self.u_inf))
+            self.st_points.append(point1)
         except RuntimeWarning as err:
             print('gamma is too large')
             pass
         try:
-            self.st_points.append((-np.sqrt(self.R ** 2 - (self.gamma / (4 * np.pi * self.u_inf)) ** 2),
-                                   -self.gamma / (4 * np.pi * self.u_inf)))
+            point2 = (-cmath.sqrt(self.R ** 2 - (self.gamma / (4 * cmath.pi * self.u_inf)) ** 2) * 1j,
+                      -self.gamma / (4 * cmath.pi * self.u_inf))
+            self.st_points.append(point2)
         except RuntimeWarning as err:
             print('gamma is too large')
             pass
@@ -207,8 +216,8 @@ class SpaceDomain:
         ax.set_aspect('equal')
         ax.axis([self.x_start, self.x_end, self.y_start, self.y_end])
 
-        ax.streamplot(self.X, self.Y, self.u, self.v, density=5, linewidth=1, arrowsize=1,arrowstyle='->')
-        ax.contour(self.X,self.Y,self.psi,levels=[0.], colors='#CD2305', linewidths=2, linestyles='solid')
+        ax.streamplot(self.X, self.Y, self.u, self.v, density=2, linewidth=1, arrowsize=1,arrowstyle='->')
+        #ax.contour(self.X,self.Y,self.psi,levels=[0.], colors='#CD2305', linewidths=2, linestyles='solid')
 
         circle = plt.Circle((0, 0), radius=self.R, color='black', alpha=0.5)
 
@@ -254,10 +263,10 @@ if __name__ == '__main__':
 
     #create a freestream
     sd.create_freestream(0.5,0)
-    sd.create_source_flow(5,-2,-2)
 
     #create a doublet with a vortex
     sd.create_doublet_with_vortex()
+
 
 
     sd.get_stagnation_points()

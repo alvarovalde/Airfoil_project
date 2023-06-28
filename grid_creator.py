@@ -96,7 +96,7 @@ class Naca4Creator:
         cor_camb = np.array((self.grid_chevychev(),self.y_camberline)).transpose()  # (54,1)
         n_elem = self.coordinates.shape[0]
         nan_array = np.full((n_elem - cor_camb.shape[0], 2), np.nan)
-        self.camberline_array = np.concatenate((cor_camb, nan_array))
+        self.camberline_array = np.concatenate((cor_camb, nan_array))[::-1, ::-1]
         self.file_array = np.concatenate((self.coordinates, self.camberline_array), axis=1)
 
     def send_array(self):
