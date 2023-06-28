@@ -30,10 +30,10 @@ class SpaceDomain:
         self.st_points = []                     # positions of stagnation points, list of tuples
 
         # plotting parameters
-        self.x_start = -5                       # start of view window in x direction
-        self.x_end = 5                          # end of view window in x direction
-        self.y_start = -5                       # start of view window in y direction
-        self.y_end = 5                          # end of view window in y direction
+        self.x_start = -3                       # start of view window in x direction
+        self.x_end = 3                          # end of view window in x direction
+        self.y_start = -3                       # start of view window in y direction
+        self.y_end = 3                          # end of view window in y direction
 
 
         # variable values (depending on current construction)
@@ -101,7 +101,7 @@ class SpaceDomain:
         """
          Creates a vortex behaviour and ads it to current flow state.
         Append the vortex position to s_s list.
-        @param gamma: strength of vortex
+        @param gamma: strength of vortex. (positive rotation is clockwise)
         @param x_vor: x position of the vortex
         @param y_vor: y position of the vortex
         """
@@ -118,8 +118,8 @@ class SpaceDomain:
         Append the doublet position to s_s list.
         Create the radius of the doublet for plotting.
         @param kappa: strength of the doublet
-        @param x_db:
-        @param y_db:
+        @param x_db: x position of center of doublet
+        @param y_db: y position of center of doublet
         """
         self.kappa = kappa
         self.u = self.u + (-self.kappa / (2 * np.pi) *
@@ -133,8 +133,24 @@ class SpaceDomain:
         # calculate the cylinder radius
         self.R = np.sqrt(kappa/(2*np.pi*self.u_inf))
 
-    def create_doublet_with_vortex(self, kappa=5.0, gamma=4.0, x_vdb=0.0, y_vdb=0.0):
+    def create_doublet_with_vortex(self, kappa=1.0, gamma=0.0):
+        """
+        Creates a doublet (with a vortex inside) behaviour, esentialy a rotating solid body,
+        and ads it to current flow state.
 
+        Append the doublet position to s_s list.
+        Create the radius of the doublet for plotting.
+        @param kappa: strength of the doublet
+        @param gamma: strength of vortex, normally same as kappa. (positive rotation is clockwise)
+                    - gamma = 0: no rotation; two stagnation points (0,pi)
+                    -
+                    -
+                    -
+        @param x_vdb: (not-variable) x position of ,center of circular object
+        @param y_vdb: (not-variable) x position of ,center of circular object
+        """
+        x_vdb = 0.0
+        y_vdb = 0.0
         self.kappa = kappa
         self.gamma = gamma
         self.u = self.u + (-self.kappa / (2 * np.pi) *
