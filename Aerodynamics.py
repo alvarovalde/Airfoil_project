@@ -1,10 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
+import matplotlib, cmath, multiprocessing
 matplotlib.use('TkAgg')
-import cmath
 
-import multiprocessing
 
 
 
@@ -41,10 +39,11 @@ class SpaceDomain:
         # variable values (depending on current construction)
         self.gamma = 0
         self.kappa = 0
-        self.R = 0
 
-        #plotting values
+
+        # plotting values
         self.vec_density = 4
+        self.R = 0
 
     def create_grid(self):
         """
@@ -127,18 +126,23 @@ class SpaceDomain:
         @param y_db: y position of center of doublet
         """
         self.kappa = kappa
+
         self.u = self.u + (-self.kappa / (2 * np.pi) *
             ((self.X - x_db) ** 2 - (self.Y - y_db) ** 2) /
             ((self.X - x_db) ** 2 + (self.Y - y_db) ** 2) ** 2)
+
         self.v = self.v + (-self.kappa / (2 * np.pi) *
             2 * (self.X - x_db) * (self.Y - y_db) /
             ((self.X - x_db) ** 2 + (self.Y - y_db) ** 2) ** 2)
+
         self.psi = -self.kappa / (2 * np.pi) * (self.Y - y_db) / ((self.X - x_db) ** 2 + (self.Y - y_db) ** 2)
+
         self.s_s_pos.append((x_db, y_db))
+
         # calculate the cylinder radius
         self.R = np.sqrt(kappa/(2*np.pi*self.u_inf))
 
-    def create_doublet_with_vortex(self, kappa=1.0, gamma=7):
+    def create_doublet_with_vortex(self, kappa=1.0, gamma=1):
         """
         Creates a doublet (with a vortex inside) behaviour, esentialy a rotating solid body,
         and ads it to current flow state.
@@ -223,16 +227,25 @@ class SpaceDomain:
 
 
     def plot_field(self):
+        """
+
+        """
+
+        # use for external window
         matplotlib.use('Qt5Agg')
+
+        #start figure
         fig,ax = plt.subplots()
         ax.set_aspect('equal')
         ax.axis([self.x_start, self.x_end, self.y_start, self.y_end])
 
-        ax.streamplot(self.X, self.Y, self.u, self.v, density=self.vec, linewidth=1, arrowsize=1,arrowstyle='->')
+        #plot the vector field
+        ax.streamplot(self.X, self.Y, self.u, self.v, density=self.vec_density, linewidth=1, arrowsize=1,arrowstyle='->')
+
         #ax.contour(self.X,self.Y,self.psi,levels=[0.], colors='#CD2305', linewidths=2, linestyles='solid')
 
+        #plot the circle
         circle = plt.Circle((0, 0), radius=self.R, color='black', alpha=0.5)
-
 
         # Try to plot the source,sink,... positions
         try:
@@ -242,7 +255,6 @@ class SpaceDomain:
         except ValueError as err:
             print('No points to plot', err)
 
-        ax.axis([self.x_start, self.x_end, self.y_start, self.y_end])
         contf = plt.contourf(self.X, self.Y, self.cp, levels=np.linspace(-2.0, 1.0, 100), extend='both')
         cbar = plt.colorbar(contf)
         cbar.set_label('$C_p$', fontsize=16)
