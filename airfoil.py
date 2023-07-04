@@ -1,5 +1,5 @@
 from directory_management import clean_directory
-
+import json
 import numpy as np
 import os
 import matplotlib
@@ -39,15 +39,20 @@ class Airfoil_manager:
             file_array = np.genfromtxt(filepath, delimiter=' ', dtype=float)
 
             self.data = file_array[:, :2].transpose()  # (2,n)
-            self.x = self.data[0]
-            self.y = self.data[1]
+
             #self.camber_line = file_array[:,2:].transpose() #(2,n)
             self.name = os.path.basename(filepath)[:-4]
 
         except IndexError as error:
-            print('There is no foil to analize in the folder')
-            quit()
+            with open('FoilToAnalize/foil.json', 'r') as file:
+                json_data = json.load(file)
 
+            self.data = np.array(json_data['points']).transpose()
+        #finally:
+           # print('There is no foil to analize in the folder')
+           # quit()
+        self.x = self.data[0]
+        self.y = self.data[1]
         self.raw_coordinates = self.data.transpose()#np.array((x, y)) #array of shape (2,n): two down and n right
 
     def closest_point_to_origin(self):
