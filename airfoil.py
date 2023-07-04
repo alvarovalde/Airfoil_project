@@ -34,23 +34,23 @@ class Airfoil_manager:
         :return: safe formated information into the object
         '''
 
-        try:
-            filepath = glob.glob('FoilToAnalize\\*')[0]
-            file_array = np.genfromtxt(filepath, delimiter=' ', dtype=float)
 
-            self.data = file_array[:, :2].transpose()  # (2,n)
-
-            #self.camber_line = file_array[:,2:].transpose() #(2,n)
-            self.name = os.path.basename(filepath)[:-4]
-
-        except IndexError as error:
-            with open('FoilToAnalize/foil.json', 'r') as file:
-                json_data = json.load(file)
+        with open('FoilToAnalize/foil.json', 'r') as file:
+            json_data = json.load(file)
 
             self.data = np.array(json_data['points']).transpose()
-        #finally:
-           # print('There is no foil to analize in the folder')
-           # quit()
+        # finally:
+        #     print('There is no foil to analize in the folder')
+        #     quit()
+        # try:
+        #     filepath = glob.glob('FoilToAnalize\\*')[0]
+        #     file_array = np.genfromtxt(filepath, delimiter=' ', dtype=float)
+        #
+        #     self.data = file_array[:, :2].transpose()  # (2,n)
+        #
+        #     #self.camber_line = file_array[:,2:].transpose() #(2,n)
+        #     self.name = os.path.basename(filepath)[:-4]
+
         self.x = self.data[0]
         self.y = self.data[1]
         self.raw_coordinates = self.data.transpose()#np.array((x, y)) #array of shape (2,n): two down and n right
@@ -133,11 +133,6 @@ class Airfoil_manager:
         plt.show() #doesnt work in this backend config
         #plt.savefig(f'airfoil point representation{self.name}1.PNG', bbox_inches='tight', dpi=300)
 
-foil = Airfoil_manager()
-foil.get_airfoil_metrics()
-foil.format_airfoil(foil.closest_point_to_origin())
-foil.rotate_airfoil(30)
-foil.plot_airfoil()
 
 '''
     def get_airfoil_Javafoil(self):

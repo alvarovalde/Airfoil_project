@@ -177,9 +177,6 @@ class SpaceDomain:
         # create vortex
         self.create_vortex(self.gamma, x_vdb, y_vdb)
 
-        #append the position of the doublet
-        self.s_s_pos.append((x_vdb, y_vdb))
-
         # calculate the cylinder radius
         self.R = np.sqrt(kappa/(2*np.pi*self.u_inf))
         print(self.R*4*np.pi*self.u_inf)
@@ -242,8 +239,6 @@ class SpaceDomain:
         #plot the vector field
         ax.streamplot(self.X, self.Y, self.u, self.v, density=self.vec_density, linewidth=1, arrowsize=1,arrowstyle='->')
 
-        #ax.contour(self.X,self.Y,self.psi,levels=[0.], colors='#CD2305', linewidths=2, linestyles='solid')
-
         #plot the circle
         circle = plt.Circle((0, 0), radius=self.R, color='black', alpha=0.5)
 
@@ -291,6 +286,7 @@ class SpaceDomain:
         ax.axis([self.x_start, self.x_end, self.y_start, self.y_end])
         contf = plt.contourf(self.X, self.Y, self.psi, levels=np.linspace(-2.0, 1.0, 100), extend='both')
         cbar = plt.colorbar(contf)
+        ax.contour(self.X,self.Y,self.psi,levels=[0.], colors='#CD2305', linewidths=2, linestyles='solid')
         plt.show()
 
 if __name__ == '__main__':

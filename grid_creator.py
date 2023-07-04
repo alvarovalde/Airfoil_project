@@ -12,24 +12,24 @@ import glob
 matplotlib.use('Qt5Agg')
 import pandas as pd
 from directory_management import clean_directory
-from multiprocessing import Process, cpu_count
 import json
 
 
 class Naca4Creator:
-    def __init__(self, NACA=2309, n_points=500,JSON= True, export_camberline = False):
+    def __init__(self, NACA=2309, n_points=500,JSON= True, export_camberline = False,accuracy = 4):
         """
         This class creates the naca 4 series outline as a series of (X,Y) points
          and exports it:
             - As a JSON file if JSON = True
             - As a .dat file (not recomended)
         It also accepts:
-         the NACA denomination number (defaults to NACA2309)
-         the number of points in the final outline (defaults to 500)
-         whether it exports the (X,Y) coordinates of the camberline
+         + the NACA denomination number (defaults to NACA2309)
+         + the number of points in the final outline (defaults to 500)
+         + whether it exports the (X,Y) coordinates of the camberline
+         + the significant figures of the
 
         """
-
+        self.accuracy = accuracy
         self.JSON = JSON
 
         self.NACA = NACA  # this is name of naca before processing
@@ -49,20 +49,26 @@ class Naca4Creator:
         # final distributions
         self.camberline = export_camberline
         self.coordinates = None  # coordinates of the thickness distribution
-        self.camberline_array = None
-        self.file_array = None
+        self.cor_camb= None
 
     def check_name(self):
+        """
+        Checks the given string and if correct retrieves the characteristics
+        """
         self.NACA = str(self.NACA)
-        if len(self.NACA) == self.NACA_designator:
-            self.max_camber = float(self.NACA[0]) / 100
-            self.loc_mc = float(self.NACA[1]) / 10
-            self.thickness = float(self.NACA[2:]) / 100
-        if len(self.NACA) != self.NACA_designator:
-            print(f'This NACA only asks for a {self.NACA_designator} number')
+        try:
+            if len(self.NACA) == self.NACA_designator:
+                self.max_camber = float(self.NACA[0]) / 100
+                self.loc_mc = float(self.NACA[1]) / 10
+                self.thickness = float(self.NACA[2:]) / 100
+            if len(self.NACA) != self.NACA_designator:
+                print(f'This NACA only asks for a {self.NACA_designator} number')
+        except SyntaxError as err:
+            print('Check the name',err)
+            quit()
 
     def grid_uniform(self):
-        return np.linspace(0, 1, self.n_points)
+        return np.round(np.linspace(0, 1, self.n_points),self.accuracy)
 
     def grid_chevychev(self):
         xi = np.cos(np.pi / (2 * (self.n_points + 1)) * (2 * np.linspace(0, self.n_points + 1, self.n_points) - 1))
@@ -110,15 +116,18 @@ class Naca4Creator:
         cor_up = np.array((xu, yu)).transpose()
         cor_down = np.array((xl, yl)).transpose()
 
-        self.coordinates = np.concatenate((cor_down, cor_up))  # (102,1)
-
+        self.coordinates = np.round(np.concatenate((cor_down, cor_up)),self.accuracy)  # (102,1)
         json_list = self.coordinates.tolist()
 
+        if self.camberline:
+            self.cor_camb = np.round(np.array((self.grid_chevychev(), self.y_camberline)).transpose(),self.accuracy).tolist()  # (54,1)
+
+
         self.foilJSON = {
-            "points": json_list,
             "name": f"{self.name}",
             "camberline": self.camberline,
-            "camberpoints": None
+            "points": json_list,
+            "camber points": self.cor_camb
 
         }
 
@@ -130,28 +139,21 @@ class Naca4Creator:
         # create new file
         if self.JSON:
             with open('FoilToAnalize/foil.json', 'w') as file:
-                json.dump(self.foilJSON, file)
+                json.dump(self.foilJSON, file, indent=4)
         else:
             np.savetxt(f"FoilToAnalize/{self.name}.dat", self.coordinates, delimiter=' ')
-
-    def create_final_array(self):
-        cor_camb = np.array((self.grid_chevychev(),self.y_camberline)).transpose()  # (54,1)
-        n_elem = self.coordinates.shape[0]
-        nan_array = np.full((n_elem - cor_camb.shape[0], 2), np.nan)
-        self.camberline_array = np.concatenate((cor_camb, nan_array))[::-1, ::-1]
-        self.file_array = np.concatenate((self.coordinates, self.camberline_array), axis=1)
-
-
-    def make_airfoil(self):
-        self.check_name()
+    def make_foil_structure(self):
         self.y_camberline = self.camberline_function(self.grid_chevychev())
         self.theta = self.theta_funct(self.grid_chevychev())
         self.y_thickness = self.get_contour_thickness(self.grid_chevychev())
         self.coordinates = self.create_point_distribution()
-        # self.create_final_array()
+
+    def generate_airfoil(self):
+        self.check_name()
+        self.make_foil_structure()
         self.send_array()
 
 
-x = Naca4Creator(NACA=2112, n_points=40,JSON=False)
-x.make_airfoil()
+x = Naca4Creator(NACA=2122, n_points=40,JSON=True,export_camberline=True)
+x.generate_airfoil()
 
