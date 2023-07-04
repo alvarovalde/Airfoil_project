@@ -226,9 +226,9 @@ class SpaceDomain:
 
 
 
-    def plot_field(self):
+    def plot_field(self,pressure_field = True):
         """
-
+        plotting the field with Matplotlib.
         """
 
         # use for external window
@@ -255,10 +255,11 @@ class SpaceDomain:
         except ValueError as err:
             print('No points to plot', err)
 
-        contf = plt.contourf(self.X, self.Y, self.cp, levels=np.linspace(-2.0, 1.0, 100), extend='both')
-        cbar = plt.colorbar(contf)
-        cbar.set_label('$C_p$', fontsize=16)
-        #cbar.set_ticks([-2.0, -1.0, 0.0, 1])
+        #choose wether to plot the pressure field
+        if pressure_field:
+            contf = plt.contourf(self.X, self.Y, self.cp, levels=np.linspace(-2.0, 1.0, 100), extend='both')
+            cbar = plt.colorbar(contf)
+            cbar.set_label('$C_p$', fontsize=16)
 
         #try to plot the stagnation points
         try:
@@ -266,9 +267,11 @@ class SpaceDomain:
             ax.scatter(x,y,color='g')
         except Error as err:
             pass
+
+        #add the circle to the plot
         ax.add_patch(circle)
 
-
+        #show the plot
         plt.show()
 
     def plot_cp(self,cp):
@@ -291,6 +294,7 @@ class SpaceDomain:
         plt.show()
 
 if __name__ == '__main__':
+
     #create an instance of the Space_domain and generate the grid
     sd =SpaceDomain()
     sd.create_grid()
@@ -307,7 +311,7 @@ if __name__ == '__main__':
     cp = sd.get_cp()
 
     p1 = multiprocessing.Process(target=sd.plot_cp(cp))
-    p2 = multiprocessing.Process(target=sd.plot_field())
+    p2 = multiprocessing.Process(target=sd.plot_field(pressure_field=True))
 
     # Start both processes
     p1.start()

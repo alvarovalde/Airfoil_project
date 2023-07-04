@@ -12,6 +12,7 @@ matplotlib.use('Qt5Agg')
 import pandas as pd
 from directory_management import clean_directory
 from multiprocessing import Process,cpu_count
+import json
 
 class Naca4Creator:
     def __init__(self,NACA=2309,n_points=5000):
@@ -90,22 +91,27 @@ class Naca4Creator:
         cor_up = np.array((xu, yu)).transpose()
         cor_down = np.array((xl, yl)).transpose()
         self.coordinates = np.concatenate((cor_down, cor_up))  # (102,1)
+
+        json_list = self.coordinates.tolist()
+
+        data = {
+            "points" : json_list,
+            "name": f"{self.name}",
+            "camberpoints" : None
+
+
+        }
+
+        with open(f'FoilToAnalize/{self.name}.json', 'w') as file:
+            json.dump(data, file)
+
         return self.coordinates
 
-    def create_final_array(self):
-        cor_camb = np.array((self.grid_chevychev(),self.y_camberline)).transpose()  # (54,1)
-        n_elem = self.coordinates.shape[0]
-        nan_array = np.full((n_elem - cor_camb.shape[0], 2), np.nan)
-        self.camberline_array = np.concatenate((cor_camb, nan_array))[::-1, ::-1]
-        self.file_array = np.concatenate((self.coordinates, self.camberline_array), axis=1)
-
     def send_array(self):
-
         # clean directory
-        clean_directory()
-
+        #clean_directory()
         # create new file
-        np.savetxt(f"FoilToAnalize/{self.name}.dat", self.file_array, delimiter=' ')
+        np.savetxt(f"FoilToAnalize/{self.name}.dat", self.coordinates, delimiter=' ')
 
 
     def make_airfoil(self):
@@ -114,6 +120,17 @@ class Naca4Creator:
         self.theta = self.theta_funct(self.grid_chevychev())
         self.y_thickness = self.get_contour_thickness(self.grid_chevychev())
         self.coordinates = self.create_point_distribution()
-        self.create_final_array()
+        #self.create_final_array()
         self.send_array()
 
+x = Naca4Creator(NACA=2112, n_points=40)
+x.make_airfoil()
+
+"""
+    def create_final_array(self):
+        cor_camb = np.array((self.grid_chevychev(),self.y_camberline)).transpose()  # (54,1)
+        n_elem = self.coordinates.shape[0]
+        nan_array = np.full((n_elem - cor_camb.shape[0], 2), np.nan)
+        self.camberline_array = np.concatenate((cor_camb, nan_array))[::-1, ::-1]
+        self.file_array = np.concatenate((self.coordinates, self.camberline_array), axis=1)
+"""

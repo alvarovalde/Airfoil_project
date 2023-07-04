@@ -21,23 +21,12 @@ class Airfoil_manager:
         self.y = None                # np array with (1,n) points
 
         #Chord stuff (... a class maybe here in the future...?)
-        self.leading_edge = None     #tuple of coordinates
-        self.trailing_edge = None
-        self.chord_length = None
-        self.camber_line = None
+        #self.leading_edge = None     #tuple of coordinates
+        #self.trailing_edge = None
+        #self.chord_length = None
+        #self.camber_line = None
 
-    def get_airfoil_Javafoil(self):
-        filepath = glob.glob('FoilToAnalize\\*')[0]
-        with open(filepath, "r+") as f:
-            file = f.readlines()
-            fileData = file[1:]
-            name = file[:1]
-            self.data = np.loadtxt(fileData, delimiter='\t', unpack=True)
 
-            self.name = ''.join(name)[0:-1:1]
-        self.x = self.data[0]
-        self.y = self.data[1]
-        self.raw_coordinates = self.data.transpose()  # np.array((x, y)) #array of shape (2,n): two down and n right
 
     def get_airfoil_metrics(self):
         '''
@@ -52,7 +41,7 @@ class Airfoil_manager:
             self.data = file_array[:, :2].transpose()  # (2,n)
             self.x = self.data[0]
             self.y = self.data[1]
-            self.camber_line = file_array[:,2:].transpose() #(2,n)
+            #self.camber_line = file_array[:,2:].transpose() #(2,n)
             self.name = os.path.basename(filepath)[:-4]
 
         except IndexError as error:
@@ -75,21 +64,21 @@ class Airfoil_manager:
         self.data[1] /= divisor   #This step scales the y-coordinates to maintain their relative proportions to the x-coordinates.
 
         # getting the leading and trailing edge
-
-        try:
-            max_x_index = np.nanargmax(self.raw_coordinates[:, 0])
-            self.trailing_edge = tuple(self.raw_coordinates[max_x_index])
-            #print(self.trailing_edge)
-
-
-
-            min_x_index = np.nanargmin(self.camber_line.transpose()[:, 0]) #
-            self.leading_edge = tuple(closest_point)
-            #print(min_x_index,self.leading_edge)
-
-            self.chord_length = math.dist(self.leading_edge, self.trailing_edge)
-        except TypeError as e:
-            print('There is no camberline to get the LE')
+        #
+        # try:
+        #     max_x_index = np.nanargmax(self.raw_coordinates[:, 0])
+        #     self.trailing_edge = tuple(self.raw_coordinates[max_x_index])
+        #     #print(self.trailing_edge)
+        #
+        #
+        #
+        #     min_x_index = np.nanargmin(self.camber_line.transpose()[:, 0]) #
+        #     self.leading_edge = tuple(closest_point)
+        #     #print(min_x_index,self.leading_edge)
+        #
+        #     self.chord_length = math.dist(self.leading_edge, self.trailing_edge)
+        # except TypeError as e:
+        #     print('There is no camberline to get the LE')
 
     def close(self):
         pass
@@ -105,14 +94,14 @@ class Airfoil_manager:
 
         def rotateMatrix(angle):
             return np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
-        try:
-            self.camber_line_transposed = self.camber_line.transpose() @ rotateMatrix(angle).T
-            self.camber_line = self.camber_line_transposed.transpose()
-        except:
-            print("this dataset has no camberline defined")
+        # try:
+        #     self.camber_line_transposed = self.camber_line.transpose() @ rotateMatrix(angle).T
+        #     self.camber_line = self.camber_line_transposed.transpose()
+        # except:
+        #     print("this dataset has no camberline defined")
 
         self.raw_coordinates = self.raw_coordinates @ rotateMatrix(angle).T
-        self.trailing_edge = self.trailing_edge @ rotateMatrix(angle).T
+        #self.trailing_edge = self.trailing_edge @ rotateMatrix(angle).T
         self.data =self.raw_coordinates.transpose()
 
 
@@ -120,12 +109,12 @@ class Airfoil_manager:
     def plot_airfoil(self):
         fig, ax = plt.subplots(figsize=(8, 6))
         ax.scatter(self.data[0],self.data[1],s=3, color='black')
-        ax.scatter(self.trailing_edge[0], self.trailing_edge[1], color='blue')
-        try:
-            ax.scatter(self.camber_line[0], self.camber_line[1],s=2,color='0.8')
-            ax.scatter(self.leading_edge[0], self.leading_edge[1], color='red')
-        except:
-            pass
+        #ax.scatter(self.trailing_edge[0], self.trailing_edge[1], color='blue')
+        # try:
+        #     ax.scatter(self.camber_line[0], self.camber_line[1],s=2,color='0.8')
+        #     ax.scatter(self.leading_edge[0], self.leading_edge[1], color='red')
+        # except:
+        #     pass
 
 
 
@@ -139,3 +128,23 @@ class Airfoil_manager:
         plt.show() #doesnt work in this backend config
         #plt.savefig(f'airfoil point representation{self.name}1.PNG', bbox_inches='tight', dpi=300)
 
+foil = Airfoil_manager()
+foil.get_airfoil_metrics()
+foil.format_airfoil(foil.closest_point_to_origin())
+foil.rotate_airfoil(30)
+foil.plot_airfoil()
+
+'''
+    def get_airfoil_Javafoil(self):
+        filepath = glob.glob('FoilToAnalize\\*')[0]
+        with open(filepath, "r+") as f:
+            file = f.readlines()
+            fileData = file[1:]
+            name = file[:1]
+            self.data = np.loadtxt(fileData, delimiter='\t', unpack=True)
+
+            self.name = ''.join(name)[0:-1:1]
+        self.x = self.data[0]
+        self.y = self.data[1]
+        self.raw_coordinates = self.data.transpose()  # np.array((x, y)) #array of shape (2,n): two down and n right
+'''
