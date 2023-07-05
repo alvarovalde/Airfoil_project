@@ -5,24 +5,64 @@ from scipy import integrate
 import matplotlib.pyplot as plt
 import glob
 import matplotlib
-from airfoil import get_
+import json
 matplotlib.use('Qt5Agg')
 
+class Panel_method:
+    def __init__(self):
+        # aiforil main data
+        self.name = None  # NACA####
+        self.data = None  # np array with (2,n) points
+        self.raw_coordinates = None  # TRANSPOSED DATA FOR EASIER VISUALIZATION
+        self.x = None  # np array with (1,n) points
+        self.y = None
+
+    def get_airfoil_metrics(self):
+        '''
+        getting the metrics for the airfoil with the built-in generator, after generating ethe data.
+        :return: safe formated information into the object
+        '''
+
+        try:
+            with open('FoilToAnalize/foil.json', 'r') as file:
+                json_data = json.load(file)
+
+                self.name = json_data['name']
+                self.camber_builder = json_data['camberline']
+
+                if self.camber_builder:
+                    self.camber_line = np.array(json_data['camber points']).transpose()
+                    print(self.camber_line)
+                self.data = np.array(json_data['points']).transpose()
+
+        except SyntaxError as err:
+            print(err)
+            pass
+
+        self.x = self.data[0]
+        self.y = self.data[1]
+        self.raw_coordinates = self.data.transpose()                  #np.array((x, y)) #array of shape (2,n): two down and n right
+    def plot(self):
+      # plot the geometry
+        width = 10
+        plt.figure(figsize=(width, width))
+        plt.grid()
+        plt.xlabel('x', fontsize=16)
+        plt.ylabel('y', fontsize=16)
+        plt.scatter(self.x, self.y, color='k', linestyle='-', s=0.5)
+        plt.axis('scaled')
+        plt.xlim(-0.1, 1.1)
+        plt.ylim(-0.1, 0.3)
+        plt.show()
 
 
 
+pm = Panel_method()
+pm.get_airfoil_metrics()
+pm.plot()
 
-# plot the geometry
-width = 10
-plt.figure(figsize=(width, width))
-plt.grid()
-plt.xlabel('x', fontsize=16)
-plt.ylabel('y', fontsize=16)
-plt.plot(x, y, color='k', linestyle='-', linewidth=2)
-plt.axis('scaled')
-plt.xlim(-0.1, 1.1)
-plt.ylim(-0.1, 0.3)
-plt.show()
+
+quit()
 
 
 class Panel:
@@ -142,8 +182,6 @@ def define_panels(x, y, N=40):
 
 
 
-
-quit()
 
 N = 40                           # number of panels
 panels = define_panels(x, y, N)  # discretizes of the geometry into panels

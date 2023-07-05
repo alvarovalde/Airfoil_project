@@ -58,19 +58,6 @@ class Airfoil_manager:
         #     quit()
 
 
-
-
-        # try:
-        #     filepath = glob.glob('FoilToAnalize\\*')[0]
-        #     file_array = np.genfromtxt(filepath, delimiter=' ', dtype=float)
-        #
-        #     self.data = file_array[:, :2].transpose()  # (2,n)
-        #
-        #     #self.camber_line = file_array[:,2:].transpose() #(2,n)
-        #     self.name = os.path.basename(filepath)[:-4]
-
-
-
         self.x = self.data[0]
         self.y = self.data[1]
         self.raw_coordinates = self.data.transpose()                  #np.array((x, y)) #array of shape (2,n): two down and n right
