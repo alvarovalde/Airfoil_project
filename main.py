@@ -5,7 +5,7 @@ from Naca4 import Naca4Creator
 import threading
 from PySide6 import QtGui, QtCore, QtWidgets
 
-
+'Hello'
 def main():
     # airfoil creator
     t1_start = time.perf_counter()
