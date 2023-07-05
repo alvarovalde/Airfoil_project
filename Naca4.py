@@ -16,7 +16,7 @@ import json
 
 
 class Naca4Creator:
-    def __init__(self, NACA=2309, n_points=500,JSON= True, export_camberline = False,accuracy = 4):
+    def __init__(self, NACA=2309, n_points=40,JSON= True, export_camberline = False,accuracy = 4):
         """
         This class creates the naca 4 series outline as a series of (X,Y) points
          and exports it:
@@ -125,6 +125,7 @@ class Naca4Creator:
 
         self.foilJSON = {
             "name": f"{self.name}",
+            "number of points": self.n_points,
             "camberline": self.camberline,
             "points": json_list,
             "camber points": self.cor_camb
