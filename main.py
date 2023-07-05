@@ -1,7 +1,7 @@
 import time
 from airfoil import Airfoil_manager
 from directory_management import clean_directory
-from grid_creator import Naca4Creator
+from Naca4 import Naca4Creator
 import threading
 from PySide6 import QtGui, QtCore, QtWidgets
 
@@ -9,7 +9,7 @@ from PySide6 import QtGui, QtCore, QtWidgets
 def main():
     # airfoil creator
     t1_start = time.perf_counter()
-    x = Naca4Creator(NACA=2112, n_points=400)
+    x = Naca4Creator(NACA=2112, n_points=400,export_camberline=True)
     x.generate_airfoil()
 
     # airfoil asignation

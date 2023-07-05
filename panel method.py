@@ -5,45 +5,8 @@ from scipy import integrate
 import matplotlib.pyplot as plt
 import glob
 import matplotlib
+from airfoil import get_
 matplotlib.use('Qt5Agg')
-
-def get_airfoil_Javafoil():
-    try:
-        filepath = glob.glob('FoilToAnalize\\*')[0]
-        file_array = np.genfromtxt(filepath, delimiter=' ', dtype=float)
-
-        data = file_array[:, :2].transpose()  # (2,n)
-        print(data)
-        x = data[0]
-        y = data[1]
-        n_point = 0
-    except IndexError as error:
-        print('There is no foil to analize in the folder')
-        quit()
-
-    x = data[0]
-    y = data[1]
-
-    for i, (x, y) in enumerate(zip(data[0], data[1])):
-        plt.scatter(x, y, color='blue')
-        plt.annotate(str(i), (x, y), textcoords="offset points", xytext=(0, 10), ha='center')
-
-    # Set plot title and labels
-    plt.title('Points with Indices')
-    plt.xlabel('X')
-    plt.ylabel('Y')
-
-    # Set plot limits
-    plt.xlim(data[0].min() - 1, data[0].max() + 1)
-    plt.ylim(data[1].min() - 1, data[1].max() + 1)
-
-    # Display the plot
-    plt.show()
-
-    return x,y
-
-x,y = get_airfoil_Javafoil()
-
 
 
 
