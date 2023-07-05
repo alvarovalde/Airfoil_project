@@ -5,24 +5,11 @@ from scipy import integrate
 import matplotlib.pyplot as plt
 import glob
 import matplotlib
-from airfoil import get_
+import json
 matplotlib.use('Qt5Agg')
 
 
 
-
-
-# plot the geometry
-width = 10
-plt.figure(figsize=(width, width))
-plt.grid()
-plt.xlabel('x', fontsize=16)
-plt.ylabel('y', fontsize=16)
-plt.plot(x, y, color='k', linestyle='-', linewidth=2)
-plt.axis('scaled')
-plt.xlim(-0.1, 1.1)
-plt.ylim(-0.1, 0.3)
-plt.show()
 
 
 class Panel:
@@ -74,94 +61,116 @@ class Panel:
         self.cp = 0.0  # pressure coefficient
 
 
-def define_panels(x, y, N=40):
-    """
-    Discretizes the geometry into panels using the 'cosine' method.
-
-    Parameters
-    ----------
-    x: 1D array of floats
-        x-coordinate of the points defining the geometry.
-    y: 1D array of floats
-        y-coordinate of the points defining the geometry.
-    N: integer, optional
-        Number of panels;
-        default: 40.
-
-    Returns
-    -------
-    panels: 1D Numpy array of Panel objects
-        The discretization of the geometry into panels.
-    """
-    R = (x.max() - x.min()) / 2  # radius of the circle
-    x_center = (x.max() + x.min()) / 2  # x-coord of the center
-    # define x-coord of the circle points
-    x_circle = x_center + R * np.cos(np.linspace(0.0, 2 * math.pi, N + 1))
-
-    x_ends = np.copy(x_circle)  # projection of the x-coord on the surface
-    y_ends = np.empty_like(x_ends)  # initialization of the y-coord Numpy array
-
-    x, y = np.append(x, x[0]), np.append(y, y[0])  # extend arrays using numpy.append
-
-    # computes the y-coordinate of end-points
-    I = 0
-    for i in range(N):
-        while I < len(x) - 1:
-            if (x[I] <= x_ends[i] <= x[I + 1]) or (x[I + 1] <= x_ends[i] <= x[I]):
-                break
-            else:
-                I += 1
-            if I >= len(x) - 1:
-                break
-        if I >= len(x) - 1:
-            break
-        a = (y[I + 1] - y[I]) / (x[I + 1] - x[I])
-        b = y[I + 1] - a * x[I + 1]
-        y_ends[i] = a * x_ends[i] + b
-    y_ends[N] = y_ends[0]
-
-    panels = np.empty(N, dtype=object)
-    for i in range(N):
-        panels[i] = Panel(x_ends[i], y_ends[i], x_ends[i + 1], y_ends[i + 1])
-
-    return panels
 
 
+class Panel_method:
+    def __init__(self):
+        # aiforil main data
+        self.name = None  # NACA####
+        self.data = None  # np array with (2,n) points
+        self.raw_coordinates = None  # TRANSPOSED DATA FOR EASIER VISUALIZATION
+        self.x = None  # np array with (1,n) points
+        self.y = None
 
+    def get_airfoil_metrics(self):
+        '''
+        getting the metrics for the airfoil with the built-in generator, after generating ethe data.
+        :return: safe formated information into the object
+        '''
+
+        try:
+            with open('FoilToAnalize/foil.json', 'r') as file:
+                json_data = json.load(file)
+
+                self.name = json_data['name']
+                self.camber_builder = json_data['camberline']
+                self.n_points = json_data['number of points']
+
+                if self.camber_builder:
+                    self.camber_line = np.array(json_data['camber points']).transpose()
+                    print(self.camber_line)
+                self.data = np.array(json_data['points']).transpose()
+
+        except SyntaxError as err:
+            print(err)
+            pass
+
+        self.x = self.data[0]
+        self.y = self.data[1]
+        self.raw_coordinates = self.data.transpose()
+        #np.array((x, y)) #array of shape (2,n): two down and n right
+
+    def define_panels(self):
+
+
+        x_ends = np.copy(self.x)  # projection of the x-coord on the surface
+        y_ends = np.copy(self.y)  # initialization of the y-coord Numpy array
+
+
+        self.panels = np.empty(self.n_points - 1, dtype=object)
+        for i in range(self.n_points -1):
+            self.panels[i] = Panel(x_ends[i], y_ends[i], x_ends[i + 1], y_ends[i + 1])
+
+        print(self.panels)
+        return self.panels
 
 
 
+    def plot(self):
+      # plot the geometry
+        width = 10
+        plt.figure(figsize=(width, width))
+        plt.grid()
+        plt.xlabel('x', fontsize=16)
+        plt.ylabel('y', fontsize=16)
+        plt.scatter(self.x, self.y, color='k', linestyle='-', s=0.5)
+        plt.axis('scaled')
+        plt.xlim(-0.1, 1.1)
+        plt.ylim(-0.1, 0.3)
+        plt.show()
 
+    def plot_panels(self):
 
-
-
-
-
-
-
-
-
+        # plot the geometry and the panels
+        width = 10
+        plt.figure(figsize=(width, width))
+        plt.grid()
+        plt.xlabel('x', fontsize=16)
+        plt.ylabel('y', fontsize=16)
+        plt.plot(self.x, self.y, color='k', linestyle='-', linewidth=2)
+        plt.plot(np.append([panel.xa for panel in self.panels], self.panels[0].xa),
+                 np.append([panel.ya for panel in self.panels], self.panels[0].ya),
+                 linestyle='-', linewidth=1, marker='o', markersize=6, color='#CD2305')
+        plt.axis('scaled')
+        plt.xlim(-0.1, 1.1)
+        plt.ylim(-0.1, 0.3)
+        plt.show()
 
 
 quit()
 
-N = 40                           # number of panels
-panels = define_panels(x, y, N)  # discretizes of the geometry into panels
 
-# plot the geometry and the panels
-width = 10
-plt.figure(figsize=(width, width))
-plt.grid()
-plt.xlabel('x', fontsize=16)
-plt.ylabel('y', fontsize=16)
-plt.plot(x, y, color='k', linestyle='-', linewidth=2)
-plt.plot(np.append([panel.xa for panel in panels], panels[0].xa),
-            np.append([panel.ya for panel in panels], panels[0].ya),
-            linestyle='-', linewidth=1, marker='o', markersize=6, color='#CD2305')
-plt.axis('scaled')
-plt.xlim(-0.1, 1.1)
-plt.ylim(-0.1, 0.3)
-plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class Freestream:

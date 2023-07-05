@@ -41,6 +41,9 @@ class Airfoil_manager:
 
                 self.name = json_data['name']
                 self.camber_builder = json_data['camberline']
+                self.tot_points= json_data['number of points']
+                self.accuracy = json_data['sig fig']
+
 
                 if self.camber_builder:
                     self.camber_line = np.array(json_data['camber points']).transpose()
@@ -56,19 +59,6 @@ class Airfoil_manager:
         # finally:
         #     print('There is no foil to analize in the folder')
         #     quit()
-
-
-
-
-        # try:
-        #     filepath = glob.glob('FoilToAnalize\\*')[0]
-        #     file_array = np.genfromtxt(filepath, delimiter=' ', dtype=float)
-        #
-        #     self.data = file_array[:, :2].transpose()  # (2,n)
-        #
-        #     #self.camber_line = file_array[:,2:].transpose() #(2,n)
-        #     self.name = os.path.basename(filepath)[:-4]
-
 
 
         self.x = self.data[0]
@@ -128,6 +118,28 @@ class Airfoil_manager:
 
         self.data =self.raw_coordinates.transpose()
 
+    def send_array(self):
+
+        self.foilJSON = {
+            "name": f"{self.name}",
+            "state": 'formated',
+            "number of points": self.tot_points,
+            "sig fig": self.accuracy,
+            "camberline": self.camber_builder,
+            "points": np.round(self.raw_coordinates,self.accuracy).tolist(),
+            "camber points": np.round(self.camber_line.transpose(),self.accuracy).tolist()
+
+        }
+
+        # clean directory
+        #clean_directory()
+        # create new file
+        if self.foilJSON:
+            with open('FoilToAnalize/foil1.json', 'w') as file:
+                json.dump(self.foilJSON, file, indent=4)
+        else:
+            np.savetxt(f"FoilToAnalize/{self.name}.dat", self.coordinates, delimiter=' ')
+
 
 
     def plot_airfoil(self):
@@ -152,7 +164,14 @@ class Airfoil_manager:
 
         #plt.savefig(f'airfoil point representation{self.name}1.PNG', bbox_inches='tight', dpi=300)
 
+    def manager(self,alpha=0):
 
+        self.get_airfoil_metrics()
+        self.format_airfoil(self.closest_point_to_origin())
+
+        self.rotate_airfoil(alpha)
+        self.send_array()
+        self.plot_airfoil()
 
 
 
