@@ -9,20 +9,23 @@ from PySide6 import QtGui, QtCore, QtWidgets
 def main():
     # airfoil creator
     t1_start = time.perf_counter()
-    x = Naca4Creator(NACA=2112, n_points=400,export_camberline=True)
+    x = Naca4Creator(NACA=2112, n_points=40,export_camberline=True)
     x.generate_airfoil()
+
 
     # airfoil asignation
     foil = Airfoil_manager()
-    foil.get_airfoil_metrics()
+    foil.manager(5)
 
+    pm = Panel_method()
+    pm.get_airfoil_metrics()
+    pm.plot()
+    pm.define_panels()
+    pm.plot_panels()
 
-    foil.format_airfoil(foil.closest_point_to_origin())
-
-    foil.rotate_airfoil(0)
 
     t1_stop = time.perf_counter()
-    foil.plot_airfoil()
+
     print("Elapsed time during the whole program in seconds:",
           t1_stop - t1_start)
 

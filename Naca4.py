@@ -34,6 +34,8 @@ class Naca4Creator:
 
         self.NACA = NACA  # this is name of naca before processing
         self.n_points = math.ceil(n_points / 2)
+        self.tot_points = n_points
+
         self.NACA_designator = 4
 
         self.name = 'NACA ' + str(NACA)
@@ -68,9 +70,10 @@ class Naca4Creator:
             quit()
 
     def grid_uniform(self):
-        return np.round(np.linspace(0, 1, self.n_points),self.accuracy)
+        return np.round(np.linspace(0, 1, self.n_points),self.accuracy+1)
 
     def grid_chevychev(self):
+
         xi = np.cos(np.pi / (2 * (self.n_points + 1)) * (2 * np.linspace(0, self.n_points + 1, self.n_points) - 1))
         return ((-xi + 1) / 2) * (1 - 0) + 0
 
@@ -114,18 +117,21 @@ class Naca4Creator:
         yl = self.y_camberline - self.y_thickness * np.cos(self.theta)
 
         cor_up = np.array((xu, yu)).transpose()
-        cor_down = np.array((xl, yl)).transpose()
+        cor_down = np.array((xl, yl)).transpose()[::-1]
 
-        self.coordinates = np.round(np.concatenate((cor_down, cor_up)),self.accuracy)  # (102,1)
+        self.coordinates = np.round(np.concatenate((cor_down, cor_up)),self.accuracy+1)  # (102,1)
         json_list = self.coordinates.tolist()
 
+
         if self.camberline:
-            self.cor_camb = np.round(np.array((self.grid_chevychev(), self.y_camberline)).transpose(),self.accuracy).tolist()  # (54,1)
+            self.cor_camb = np.round(np.array((self.grid_chevychev(), self.y_camberline)).transpose(),self.accuracy+1).tolist()  # (54,1)
 
 
         self.foilJSON = {
             "name": f"{self.name}",
-            "number of points": self.n_points,
+            "state": 'created',
+            "number of points": self.tot_points,
+            "sig fig": self.accuracy,
             "camberline": self.camberline,
             "points": json_list,
             "camber points": self.cor_camb
@@ -133,6 +139,24 @@ class Naca4Creator:
         }
 
         return self.coordinates
+    def plot(self):
+        # Plot the points with indices
+        self.x = self.coordinates.T[0]
+        self.y = self.coordinates.T[1]
+        fig, ax = plt.subplots()
+        ax.scatter(self.x, self.y)
+
+        # Add indices as text labels
+        for i, (xi, yi) in enumerate(zip(self.x, self.y)):
+            ax.text(xi, yi, str(i), color='red')
+
+        # Set axis labels and title
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_title('Points with Indices')
+
+        # Show the plot
+        plt.show()
 
     def send_array(self):
         # clean directory
@@ -153,4 +177,4 @@ class Naca4Creator:
         self.check_name()
         self.make_foil_structure()
         self.send_array()
-
+        #self.plot()
