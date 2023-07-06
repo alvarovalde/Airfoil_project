@@ -106,6 +106,7 @@ class Airfoil_manager:
 
         def rotateMatrix(angle):
             return np.array([[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]])
+
         if self.camber_builder:
             try:
                 self.camber_line_transposed = self.camber_line.transpose() @ rotateMatrix(angle).T
@@ -135,7 +136,7 @@ class Airfoil_manager:
         #clean_directory()
         # create new file
         if self.foilJSON:
-            with open('FoilToAnalize/foil1.json', 'w') as file:
+            with open('FoilToAnalize/foil.json', 'w') as file:
                 json.dump(self.foilJSON, file, indent=4)
         else:
             np.savetxt(f"FoilToAnalize/{self.name}.dat", self.coordinates, delimiter=' ')

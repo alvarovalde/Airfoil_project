@@ -30,8 +30,8 @@ class SpaceDomain:
         self.st_points = []                     # positions of stagnation points, list of tuples
 
         # plotting parameters
-        self.x_start = -8                       # start of view window in x direction
-        self.x_end = 8                          # end of view window in x direction
+        self.x_start = -4                       # start of view window in x direction
+        self.x_end = 4                          # end of view window in x direction
         self.y_start = -4                       # start of view window in y direction
         self.y_end = 4                          # end of view window in y direction
 
@@ -70,6 +70,8 @@ class SpaceDomain:
         self.psi = self.psi + self.u_inf * self.Y
         self.u += self.u_inf*np.cos(a)
         self.v += self.u_inf * np.sin(a)
+
+
 
     def create_source_flow(self, strength=1.0, x_sr=0.0, y_sr=0.0):
         """
@@ -186,6 +188,7 @@ class SpaceDomain:
         Creates a scalar field of the preasure coefficients, which can then be plotted.
         @return:returns the Cp object
         """
+        print(np.shape(self.u))
         try:
             self.cp = 1.0 - (self.u ** 2 + self.v ** 2) / self.u_inf ** 2
         except TypeError as err:
@@ -260,7 +263,7 @@ class SpaceDomain:
         try:
             x,y = np.array(self.st_points).T
             ax.scatter(x,y,color='g')
-        except Error as err:
+        except:
             pass
 
         #add the circle to the plot
@@ -303,7 +306,7 @@ if __name__ == '__main__':
 
 
 
-    sd.get_stagnation_points()
+    #sd.get_stagnation_points()
     cp = sd.get_cp()
 
     p1 = multiprocessing.Process(target=sd.plot_cp(cp))

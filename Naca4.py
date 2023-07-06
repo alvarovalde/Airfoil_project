@@ -120,6 +120,8 @@ class Naca4Creator:
         cor_down = np.array((xl, yl)).transpose()[::-1]
 
         self.coordinates = np.round(np.concatenate((cor_down, cor_up)),self.accuracy+1)  # (102,1)
+        self.coordinates[-1] = self.coordinates[0]
+
         json_list = self.coordinates.tolist()
 
 
@@ -177,4 +179,4 @@ class Naca4Creator:
         self.check_name()
         self.make_foil_structure()
         self.send_array()
-        #self.plot()
+        self.plot()

@@ -3,13 +3,13 @@ from airfoil import Airfoil_manager
 from directory_management import clean_directory
 from Naca4 import Naca4Creator
 import threading
+from panel_Method import Panel,Panel_method
 from PySide6 import QtGui, QtCore, QtWidgets
 
-'Hello'
 def main():
     # airfoil creator
     t1_start = time.perf_counter()
-    x = Naca4Creator(NACA=2112, n_points=40,export_camberline=True)
+    x = Naca4Creator(NACA=2112, n_points=400,export_camberline=True)
     x.generate_airfoil()
 
 
